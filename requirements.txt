@@ -2,3 +2,4 @@ Flask
 flask-cors
 spacy
 scikit-learn
+gunicorn

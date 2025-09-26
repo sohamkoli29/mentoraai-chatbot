@@ -8,12 +8,16 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 # Load spaCy English model
-try:
-    nlp = spacy.load("en_core_web_sm")
-    print("✅ spaCy model loaded successfully")
-except OSError:
-    print("❌ spaCy model not found. Please run: python -m spacy download en_core_web_sm")
-    exit(1)
+nlp = None  # global variable for lazy-loading spaCy
+
+def get_nlp():
+    global nlp
+    if nlp is None:
+        import spacy
+        nlp = spacy.load("en_core_web_sm")
+        print("✅ spaCy model loaded successfully (lazy)")
+    return nlp
+
 
 # --- Knowledge Base ---
 courses = {
@@ -81,7 +85,7 @@ def preprocess_text(text):
     text = text.lower()
     for key, val in synonyms.items():
         text = text.replace(key, val)
-    doc = nlp(text)
+    doc = get_nlp()(text)
     tokens = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
     return " ".join(tokens)
 
